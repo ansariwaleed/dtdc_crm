@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-xl font-bold mb-4">Customers</h1>
+
+<div class="space-y-3">
+{% for customer in customers %}
+<div class="bg-white p-4 rounded shadow">
+    <p class="font-bold">{{ customer.phone }}</p>
+    <p class="text-sm text-gray-600">
+        Shipments: {{ customer.total_shipments }}
+    </p>
+    <p class="text-sm text-gray-600">
+        Revenue: ₹{{ customer.total_revenue or 0 }}
+    </p>
+    <p class="text-sm text-gray-500">
+        Last Visit: {{ customer.last_visit.strftime('%d %b %Y') }}
+    </p>
+</div>
+{% endfor %}
+</div>
+{% endblock %}

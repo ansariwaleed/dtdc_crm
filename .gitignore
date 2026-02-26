@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+venv/
+.env
+*.db
+*.sqlite
+.vscode/
+.idea/
+render.yaml # Optional: if you want to keep deployment local

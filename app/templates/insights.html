@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+        <h2 class="text-2xl font-bold text-slate-800">Business Growth</h2>
+        <p class="text-sm text-slate-500">Market analytics & insights</p>
+    </div>
+
+    <form method="get"
+        class="flex items-center gap-2 bg-white/50 p-1.5 rounded-2xl shadow-sm border border-white max-w-fit">
+        <input type="date" name="start_date" value="{{ start_date }}"
+            class="text-xs bg-transparent border-none focus:ring-0 text-slate-600 font-medium">
+        <span class="text-slate-300">-</span>
+        <input type="date" name="end_date" value="{{ end_date }}"
+            class="text-xs bg-transparent border-none focus:ring-0 text-slate-600 font-medium">
+        <button type="submit" class="bg-dtdc-blue text-white p-1.5 rounded-xl hover:bg-blue-700 transition">
+            <i data-lucide="filter" class="w-4 h-4"></i>
+        </button>
+        {% if start_date or end_date %}
+        <a href="/insights" class="text-slate-400 p-1.5 hover:text-slate-600 rounded-xl transition">
+            <i data-lucide="x-circle" class="w-4 h-4"></i>
+        </a>
+        {% endif %}
+    </form>
+</div>
+
+<div class="space-y-6">
+
+    <!-- Re-engagement Card -->
+    <div class="bg-white border-2 border-red-50 p-6 rounded-[32px] shadow-sm flex items-center gap-6">
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-red-600">
+            <i data-lucide="zap" class="w-8 h-8"></i>
+        </div>
+        <div>
+            <p class="text-2xl font-black text-slate-800">{{ inactive_customers }}</p>
+            <p class="text-sm font-semibold text-slate-500">Inactive > 45 Days</p>
+            <p class="text-xs text-slate-400 mt-1">Ready for re-engagement campagin.</p>
+        </div>
+    </div>
+
+    <!-- Top Cities -->
+    <div class="card-blur p-6 rounded-[32px] border border-white shadow-sm">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center">
+                <i data-lucide="map" class="w-5 h-5 text-blue-600"></i>
+            </div>
+            <h3 class="font-bold text-slate-800">Dominant Lanes</h3>
+        </div>
+
+        <div class="space-y-4">
+            {% for city in top_cities %}
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span
+                        class="w-6 h-6 rounded-full bg-slate-100 text-[10px] font-bold flex items-center justify-center text-slate-400">{{
+                        loop.index }}</span>
+                    <span class="font-bold text-slate-700 uppercase tracking-tight">{{ city.destination_city }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="h-1 w-20 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-dtdc-blue"
+                            style="width: {{ (city.count / top_cities[0].count * 100)|int if top_cities else 0}}%">
+                        </div>
+                    </div>
+                    <span class="text-xs font-bold text-slate-500">{{ city.count }}</span>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-center text-slate-400 text-sm py-4">No data yet</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Optimization Tip -->
+    <div class="bg-dtdc-blue p-6 rounded-[32px] text-white">
+        <h4 class="font-bold flex items-center gap-2 mb-2">
+            <i data-lucide="info" class="w-4 h-4"></i>
+            Pro Tip
+        </h4>
+        <p class="text-xs text-blue-100 leading-relaxed opacity-80">
+            Your top destination is <span class="font-bold border-b border-white/30 whitespace-nowrap">{{
+                top_cities[0].destination_city if top_cities else 'N/A' }}</span>. Consider offering bulk discounts to
+            regular clients shipping here.
+        </p>
+    </div>
+
+</div>
+
+{% endblock %}

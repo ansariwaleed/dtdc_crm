@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-8">
+    <h2 class="text-2xl font-bold text-slate-800">New Booking</h2>
+    <p class="text-sm text-slate-500">Add a shipment to the system</p>
+</div>
+
+<form id="bookingForm" method="post" action="/add" class="space-y-6" target="_blank" onsubmit="handleFormSubmit()">
+
+    <div class="space-y-1">
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">Customer Contact</label>
+        <div class="relative">
+            <input type="tel" name="phone" placeholder="9876543210" pattern="[0-9]{10}" maxlength="10"
+                class="w-full bg-white border-2 border-slate-100 rounded-3xl py-4 px-12 focus:border-dtdc-blue focus:ring-4 focus:ring-blue-100 outline-none transition-all shadow-sm"
+                required>
+            <i data-lucide="phone" class="absolute left-4 top-4.5 w-5 h-5 text-slate-400"></i>
+        </div>
+        <p class="text-[10px] text-slate-400 px-1">10-digit mobile number</p>
+    </div>
+
+    <div class="space-y-1">
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">Tracking Logistics</label>
+        <div class="relative">
+            <input type="text" name="tracking_id" placeholder="Tracking ID (AWB)"
+                class="w-full bg-white border-2 border-slate-100 rounded-3xl py-4 px-12 focus:border-dtdc-blue focus:ring-4 focus:ring-blue-100 outline-none transition-all shadow-sm uppercase"
+                required>
+            <i data-lucide="hash" class="absolute left-4 top-4.5 w-5 h-5 text-slate-400"></i>
+        </div>
+    </div>
+
+    <div class="space-y-1">
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">Manifest Destination</label>
+        <div class="relative">
+            <input type="text" name="destination_city" placeholder="City Name"
+                class="w-full bg-white border-2 border-slate-100 rounded-3xl py-4 px-12 focus:border-dtdc-blue focus:ring-4 focus:ring-blue-100 outline-none transition-all shadow-sm uppercase"
+                required>
+            <i data-lucide="map-pin" class="absolute left-4 top-4.5 w-5 h-5 text-slate-400"></i>
+        </div>
+    </div>
+
+    <div class="space-y-1">
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">Service Charges</label>
+        <div class="relative">
+            <input type="number" step="0.01" name="rate" placeholder="0.0"
+                class="w-full bg-white border-2 border-slate-100 rounded-3xl py-4 px-12 focus:border-dtdc-blue focus:ring-4 focus:ring-blue-100 outline-none transition-all shadow-sm"
+                required>
+            <i data-lucide="indian-rupee" class="absolute left-4 top-4.5 w-5 h-5 text-slate-400"></i>
+        </div>
+    </div>
+
+    <div class="pt-4">
+        <button type="submit" id="submitBtn"
+            class="w-full bg-dtdc-red text-white py-5 px-6 rounded-3xl font-bold shadow-lg shadow-red-200 hover:shadow-red-300 transition-all flex items-center justify-center gap-3 active:scale-95 group">
+            <span class="tracking-wide">BOOK & SEND WHATSAPP</span>
+            <i data-lucide="send" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+        </button>
+    </div>
+
+</form>
+
+<script>
+    function handleFormSubmit() {
+        const btn = document.getElementById('submitBtn');
+        const span = btn.querySelector('span');
+
+        // Visual feedback
+        span.innerText = 'GENERATING WHATSAPP LINK...';
+        btn.classList.replace('bg-dtdc-red', 'bg-green-600');
+
+        // Reset form after a delay (since it opened it in a new tab)
+        setTimeout(() => {
+            document.getElementById('bookingForm').reset();
+            span.innerText = 'BOOK & SEND WHATSAPP';
+            btn.classList.replace('bg-green-600', 'bg-dtdc-red');
+        }, 1500);
+    }
+</script>
+
+{% endblock %}

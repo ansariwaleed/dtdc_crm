@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authorize | DTDC CRM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .bg-pattern {
+            background-color: #003366;
+            background-image: radial-gradient(circle at 20% 30%, rgba(227, 30, 36, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-pattern flex items-center justify-center p-6 text-white">
+
+    <div class="w-full max-w-sm">
+        <div class="text-center mb-10">
+            <div
+                class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-blue-900/40">
+                <div
+                    class="w-10 h-10 bg-[#e31e24] rounded-lg flex items-center justify-center text-white font-black italic text-xl">
+                    D</div>
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight">DTDC CRM <span class="text-white/40 font-light">PRO</span>
+            </h1>
+            <p class="text-blue-200/60 text-sm mt-2">Franchise Internal Access Only</p>
+        </div>
+
+        <form method="post" class="glass-card p-8 rounded-[40px] shadow-2xl">
+            <div class="mb-6">
+                <label
+                    class="block text-[10px] font-bold text-blue-200 uppercase tracking-[0.2em] mb-4 text-center">Enter
+                    Security PIN</label>
+                <input type="password" name="pin" maxlength="4" autofocus placeholder="••••"
+                    class="w-full bg-white/10 border border-white/10 rounded-2xl py-5 text-center text-3xl font-black tracking-[0.5em] focus:bg-white/20 focus:border-white/30 focus:ring-0 outline-none transition-all placeholder:text-white/10"
+                    required />
+            </div>
+
+            <button type="submit"
+                class="w-full bg-[#e31e24] hover:bg-[#ff2c33] text-white py-4 rounded-2xl font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 group">
+                <span>Unlock System</span>
+                <i data-lucide="shield-check" class="w-5 h-5 opacity-50 group-hover:opacity-100 transition-opacity"></i>
+            </button>
+        </form>
+
+        <p class="text-center text-blue-200/30 text-[10px] mt-10 uppercase tracking-widest font-medium">Secure
+            End-to-End Encryption</p>
+    </div>
+
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

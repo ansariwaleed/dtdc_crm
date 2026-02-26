@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+        <h2 class="text-2xl font-bold text-slate-800">Operational Overview</h2>
+        <p class="text-sm text-slate-500">Real-time performance metrics</p>
+    </div>
+
+    <form method="get"
+        class="flex items-center gap-2 bg-white/50 p-1.5 rounded-2xl shadow-sm border border-white max-w-fit">
+        <input type="date" name="start_date" value="{{ start_date }}"
+            class="text-xs bg-transparent border-none focus:ring-0 text-slate-600 font-medium">
+        <span class="text-slate-300">-</span>
+        <input type="date" name="end_date" value="{{ end_date }}"
+            class="text-xs bg-transparent border-none focus:ring-0 text-slate-600 font-medium">
+        <button type="submit" class="bg-dtdc-blue text-white p-1.5 rounded-xl hover:bg-blue-700 transition">
+            <i data-lucide="filter" class="w-4 h-4"></i>
+        </button>
+        {% if start_date or end_date %}
+        <a href="/" class="text-slate-400 p-1.5 hover:text-slate-600 rounded-xl transition">
+            <i data-lucide="x-circle" class="w-4 h-4"></i>
+        </a>
+        {% endif %}
+    </form>
+</div>
+
+<div class="grid grid-cols-2 gap-4">
+
+    <!-- Today's Stats -->
+    <div class="card-blur p-4 rounded-3xl border border-white shadow-sm">
+        <div class="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center mb-3">
+            <i data-lucide="sun" class="w-5 h-5 text-blue-600"></i>
+        </div>
+        <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">Bookings Today</p>
+        <p class="text-2xl font-bold text-slate-800">{{ shipments_today }}</p>
+    </div>
+
+    <div class="card-blur p-4 rounded-3xl border border-white shadow-sm">
+        <div class="w-10 h-10 bg-green-100 rounded-2xl flex items-center justify-center mb-3">
+            <i data-lucide="indian-rupee" class="w-5 h-5 text-green-600"></i>
+        </div>
+        <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">Revenue Today</p>
+        <p class="text-2xl font-bold text-slate-800">₹{{ revenue_today }}</p>
+    </div>
+
+    <!-- Monthly Stats -->
+    <div class="card-blur p-4 rounded-3xl border border-white shadow-sm">
+        <div class="w-10 h-10 bg-purple-100 rounded-2xl flex items-center justify-center mb-3">
+            <i data-lucide="calendar" class="w-5 h-5 text-purple-600"></i>
+        </div>
+        <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">Monthly Total</p>
+        <p class="text-2xl font-bold text-slate-800">{{ shipments_month }}</p>
+    </div>
+
+    <div class="card-blur p-4 rounded-3xl border border-white shadow-sm">
+        <div class="w-10 h-10 bg-orange-100 rounded-2xl flex items-center justify-center mb-3">
+            <i data-lucide="trending-up" class="w-5 h-5 text-orange-600"></i>
+        </div>
+        <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">Monthly Revenue</p>
+        <p class="text-2xl font-bold text-slate-800">₹{{ revenue_month }}</p>
+    </div>
+
+    <!-- Customer Retention -->
+    <div class="card-blur p-4 rounded-3xl border border-white shadow-sm col-span-2 flex items-center justify-between">
+        <div>
+            <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">Retention Health</p>
+            <p class="text-2xl font-bold text-slate-800">{{ repeat_percent }}% <span
+                    class="text-sm font-normal text-slate-400">Repeat Customers</span></p>
+        </div>
+        <div class="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center border-4 border-red-100">
+            <i data-lucide="users" class="w-6 h-6 text-dtdc-red"></i>
+        </div>
+    </div>
+
+</div>
+
+<!-- Interactive Revenue Chart -->
+<div class="mt-6 card-blur p-5 rounded-3xl border border-white shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-slate-800">Revenue Trend (14 Days)</h3>
+        <i data-lucide="bar-chart-2" class="w-5 h-5 text-slate-400"></i>
+    </div>
+    <div class="relative h-48 w-full">
+        <canvas id="revenueChart"></canvas>
+    </div>
+</div>
+
+<!-- Top Performers -->
+<div class="mt-6 card-blur p-5 rounded-[32px] border border-white shadow-sm">
+    <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 bg-yellow-100 rounded-2xl flex items-center justify-center">
+            <i data-lucide="award" class="w-5 h-5 text-yellow-600"></i>
+        </div>
+        <h3 class="font-bold text-slate-800">Top Customers</h3>
+    </div>
+
+    <div class="space-y-4">
+        {% for cust in top_customers %}
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span
+                    class="w-6 h-6 rounded-full {{ 'bg-yellow-100 text-yellow-700' if loop.index == 1 else 'bg-slate-100 text-slate-500' }} text-[10px] font-bold flex items-center justify-center">
+                    #{{ loop.index }}
+                </span>
+                <span class="font-bold text-slate-700 tracking-tight">{{ cust.phone }}</span>
+            </div>
+            <span class="text-sm font-bold text-green-600">₹{{ cust.revenue }}</span>
+        </div>
+        {% else %}
+        <p class="text-sm text-slate-400 text-center py-2">No data yet.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Quick Action -->
+<div class="mt-8 bg-dtdc-blue p-6 rounded-3xl text-white shadow-lg shadow-blue-900/20 relative overflow-hidden">
+    <div class="relative z-10">
+        <h3 class="text-lg font-bold">New Booking</h3>
+        <p class="text-sm text-blue-200 mb-4 opacity-80">Quickly add a new tracking ID for your customer.</p>
+        <a href="/add"
+            class="inline-flex items-center gap-2 bg-white text-dtdc-blue px-5 py-2.5 rounded-2xl font-semibold text-sm transition-transform active:scale-95">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            Create Now
+        </a>
+    </div>
+    <i data-lucide="package" class="absolute -bottom-4 -right-4 w-32 h-32 text-white/5 -rotate-12"></i>
+</div>
+
+<!-- Chart.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+
+        // Dynamic data passed from the backend
+        const labels = {{ chart_labels | tojson | safe
+    }};
+    const data = {{ chart_data | tojson | safe }};
+
+    // Create a beautiful gradient for the line chart
+    let gradient = ctx.createLinearGradient(0, 0, 0, 200);
+    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)'); // dtdc-blue semi-transparent
+    gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Revenue (₹)',
+                data: data,
+                borderColor: '#3b82f6', // dtdc-blue
+                backgroundColor: gradient,
+                borderWidth: 3,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#3b82f6',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                fill: true,
+                tension: 0.4 // beautiful smooth curves
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1e293b',
+                    padding: 12,
+                    callbacks: {
+                        label: function (context) {
+                            return ' ₹' + context.parsed.y;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false, drawBorder: false },
+                    ticks: { font: { size: 10 }, color: '#94a3b8', maxTicksLimit: 7 }
+                },
+                y: {
+                    grid: { color: '#f1f5f9', drawBorder: false },
+                    ticks: { font: { size: 10 }, color: '#94a3b8', maxTicksLimit: 5, callback: function (value) { return '₹' + value; } }
+                }
+            }
+        }
+    });
+    });
+</script>
+
+{% endblock %}
