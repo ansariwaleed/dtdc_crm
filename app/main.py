@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 import io
 import openpyxl
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, cast, Date
 from datetime import datetime, timedelta
 from urllib.parse import quote
 
@@ -86,17 +86,21 @@ def home(request: Request, start_date: str = None, end_date: str = None, db: Ses
     chart_start = (now - timedelta(days=chart_days-1)).replace(hour=0, minute=0, second=0, microsecond=0)
     
     # Query daily revenue
-    # SQLite uses STRFTIME for date grouping
+    # Using cast(..., Date) is standard SQL and works on both SQLite and PostgreSQL
     daily_revenue_data = db.query(
-        func.strftime('%Y-%m-%d', Shipment.created_at).label("date"),
+        cast(Shipment.created_at, Date).label("date"),
         func.sum(Shipment.rate).label("revenue")
     ).filter(
         Shipment.created_at >= chart_start
     ).group_by(
-        func.strftime('%Y-%m-%d', Shipment.created_at)
+        cast(Shipment.created_at, Date)
     ).all()
 
-    revenue_dict = {r.date: r.revenue for r in daily_revenue_data}
+    revenue_dict = {}
+    for r in daily_revenue_data:
+        # SQLite returns strings, PostgreSQL returns date objects
+        d_str = r.date if isinstance(r.date, str) else r.date.strftime("%Y-%m-%d")
+        revenue_dict[d_str] = r.revenue
     
     revenue_chart_labels = []
     revenue_chart_data = []
