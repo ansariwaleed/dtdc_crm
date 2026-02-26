@@ -31,7 +31,8 @@
         {% endif %}
     </div>
 
-    <div class="flex items-center gap-2 bg-white/50 p-1.5 rounded-2xl shadow-sm border border-white shrink-0">
+    <div
+        class="flex flex-wrap items-center gap-2 bg-white/50 p-1.5 rounded-2xl shadow-sm border border-white shrink-0 justify-between sm:justify-start">
         <input type="date" name="start_date" value="{{ start_date }}"
             class="text-xs bg-transparent border-none focus:ring-0 text-slate-600 font-medium cursor-pointer">
         <span class="text-slate-300">-</span>
@@ -53,9 +54,9 @@
 <div class="space-y-4">
     {% for customer in customers %}
     <div id="cust-{{ customer.id }}"
-        class="card-blur p-5 rounded-3xl border border-white shadow-sm flex items-center justify-between"
+        class="card-blur p-4 sm:p-5 rounded-3xl border border-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4"
         style="transition: all 0.3s ease;">
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 w-full sm:w-auto">
             <div class="w-12 h-12 bg-dtdc-blue/10 rounded-2xl flex items-center justify-center">
                 <i data-lucide="user" class="w-6 h-6 text-dtdc-blue"></i>
             </div>
@@ -67,7 +68,8 @@
             </div>
         </div>
 
-        <div class="text-right flex items-center gap-3">
+        <div
+            class="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto border-t sm:border-none border-slate-100 pt-3 sm:pt-0">
             <div>
                 <p class="font-bold text-slate-800">₹{{ customer.total_revenue|int if customer.total_revenue else 0 }}
                 </p>
@@ -76,7 +78,8 @@
 
             <button
                 onclick="deleteCustomer(this, '/delete-customer/{{ customer.id }}', '{{ customer.id }}', 'text-red-600', 'text-slate-400')"
-                class="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Delete Customer">
+                class="p-3 text-slate-400 hover:text-red-500 transition-colors rounded-xl hover:bg-red-50"
+                title="Delete Customer">
                 <i data-lucide="trash-2" class="w-5 h-5 pointer-events-none"></i>
             </button>
         </div>
