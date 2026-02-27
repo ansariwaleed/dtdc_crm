@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, cast, Date
 
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 from urllib.parse import quote
 
 from app.database import engine, get_db
@@ -17,13 +16,13 @@ from app.models import Customer, Shipment
 from app.auth import verify_pin, create_session, is_authenticated
 
 
-# -------------------- IST TIME CONFIG --------------------
+# -------------------- IST TIME HELPER --------------------
 
-IST = ZoneInfo("Asia/Kolkata")
-
+IST_OFFSET = timedelta(hours=5, minutes=30)
 
 def get_ist_time():
-    return datetime.now(IST)
+    """Return IST time as naive datetime (DB safe)."""
+    return datetime.utcnow() + IST_OFFSET
 
 
 # -------------------- APP INIT --------------------
@@ -42,19 +41,14 @@ def parse_dates(start_date_str: str, end_date_str: str):
 
     if start_date_str:
         try:
-            start_dt = datetime.strptime(
-                start_date_str, "%Y-%m-%d"
-            ).replace(tzinfo=IST)
+            start_dt = datetime.strptime(start_date_str, "%Y-%m-%d")
         except ValueError:
             pass
 
     if end_date_str:
         try:
-            end_dt = datetime.strptime(
-                end_date_str, "%Y-%m-%d"
-            ).replace(
-                hour=23, minute=59, second=59, tzinfo=IST
-            )
+            end_dt = datetime.strptime(end_date_str, "%Y-%m-%d")
+            end_dt = end_dt.replace(hour=23, minute=59, second=59)
         except ValueError:
             pass
 
@@ -70,14 +64,12 @@ def home(request: Request, start_date: str = None, end_date: str = None, db: Ses
 
     start_dt, end_dt = parse_dates(start_date, end_date)
 
-    # ✅ IST FIX (your requested block)
     now = get_ist_time()
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
     s_today_q = db.query(Shipment).filter(Shipment.created_at >= today_start)
     r_today_q = db.query(func.sum(Shipment.rate)).filter(Shipment.created_at >= today_start)
-
     s_month_q = db.query(Shipment).filter(Shipment.created_at >= month_start)
     r_month_q = db.query(func.sum(Shipment.rate)).filter(Shipment.created_at >= month_start)
 
@@ -97,7 +89,6 @@ def home(request: Request, start_date: str = None, end_date: str = None, db: Ses
         revenue_today = rev_q.scalar() or 0
         shipments_month = shipments_today
         revenue_month = revenue_today
-
     else:
         shipments_today = s_today_q.count()
         revenue_today = r_today_q.scalar() or 0
@@ -106,14 +97,9 @@ def home(request: Request, start_date: str = None, end_date: str = None, db: Ses
 
     total_customers = db.query(Customer).count()
     repeat_customers = db.query(Customer).filter(Customer.total_shipments > 1).count()
+    repeat_percent = round((repeat_customers / total_customers) * 100, 1) if total_customers else 0
 
-    repeat_percent = (
-        round((repeat_customers / total_customers) * 100, 1)
-        if total_customers > 0 else 0
-    )
-
-    # -------------------- CHART DATA --------------------
-
+    # -------- Chart Data --------
     chart_days = 14
     chart_start = (now - timedelta(days=chart_days - 1)).replace(
         hour=0, minute=0, second=0, microsecond=0
@@ -141,8 +127,6 @@ def home(request: Request, start_date: str = None, end_date: str = None, db: Ses
         day_str = day.strftime("%Y-%m-%d")
         revenue_chart_labels.append(day.strftime("%b %d"))
         revenue_chart_data.append(revenue_dict.get(day_str, 0))
-
-    # -------------------- TOP CUSTOMERS --------------------
 
     top_customers = db.query(
         Customer.phone,
@@ -186,13 +170,6 @@ def submit_pin(pin: str = Form(...)):
 
 
 # -------------------- ADD SHIPMENT --------------------
-
-@app.get("/add", response_class=HTMLResponse)
-def add_page(request: Request):
-    if not is_authenticated(request):
-        return RedirectResponse("/pin")
-    return templates.TemplateResponse("add.html", {"request": request})
-
 
 @app.post("/add")
 def add_shipment(
@@ -240,23 +217,25 @@ def add_shipment(
     db.add(shipment)
     db.commit()
 
-    tracking_link = f"https://trackcourier.io/track-and-trace/dtdc/{tracking_id}"
-
-    message = f"""Dear Customer,
-
-Your shipment has been successfully booked.
-
-Tracking ID: {tracking_id}
-Destination: {destination_city.upper()}
-Charges: ₹{int(rate)}
-
-Track here:
-{tracking_link}
-"""
-
-    whatsapp_url = f"https://wa.me/{phone}?text={quote(message)}"
-
+    whatsapp_url = f"https://wa.me/{phone}?text={quote('Shipment booked successfully')}"
     return RedirectResponse(whatsapp_url, status_code=302)
+
+
+# -------------------- SHIPMENTS --------------------
+
+@app.get("/shipments", response_class=HTMLResponse)
+def shipments_page(request: Request, db: Session = Depends(get_db)):
+    if not is_authenticated(request):
+        return RedirectResponse("/pin")
+
+    shipments = db.query(Shipment).join(Customer)\
+        .order_by(Shipment.created_at.desc())\
+        .limit(200).all()
+
+    return templates.TemplateResponse("shipments.html", {
+        "request": request,
+        "shipments": shipments
+    })
 
 
 # -------------------- EXPORT --------------------
@@ -296,3 +275,32 @@ def export_shipments(request: Request, db: Session = Depends(get_db)):
     response.headers["Content-Disposition"] = f"attachment; filename={filename}.xlsx"
 
     return response
+
+
+# -------------------- INSIGHTS --------------------
+
+@app.get("/insights", response_class=HTMLResponse)
+def insights_page(request: Request, db: Session = Depends(get_db)):
+    if not is_authenticated(request):
+        return RedirectResponse("/pin")
+
+    inactive_threshold = get_ist_time() - timedelta(days=45)
+
+    inactive_customers = db.query(Customer).filter(
+        Customer.last_visit < inactive_threshold
+    ).count()
+
+    top_cities = db.query(
+        Shipment.destination_city,
+        func.count(Shipment.id)
+    ).group_by(
+        Shipment.destination_city
+    ).order_by(
+        func.count(Shipment.id).desc()
+    ).limit(5).all()
+
+    return templates.TemplateResponse("insights.html", {
+        "request": request,
+        "inactive_customers": inactive_customers,
+        "top_cities": top_cities
+    })
