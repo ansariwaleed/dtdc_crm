@@ -3,10 +3,8 @@ from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse, Stre
 from fastapi.templating import Jinja2Templates
 import io
 import openpyxl
-
 from sqlalchemy.orm import Session
 from sqlalchemy import func, cast, Date
-
 from datetime import datetime, timedelta
 from urllib.parse import quote
 
@@ -16,16 +14,15 @@ from app.models import Customer, Shipment
 from app.auth import verify_pin, create_session, is_authenticated
 
 
-# -------------------- IST TIME HELPER --------------------
+# ================= IST TIME FIX =================
 
 IST_OFFSET = timedelta(hours=5, minutes=30)
 
 def get_ist_time():
-    """Return IST time as naive datetime (DB safe)."""
     return datetime.utcnow() + IST_OFFSET
 
 
-# -------------------- APP INIT --------------------
+# =================================================
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -33,7 +30,7 @@ app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
 
 
-# -------------------- DATE PARSER --------------------
+# ---------------- DATE PARSER ----------------
 
 def parse_dates(start_date_str: str, end_date_str: str):
     start_dt = None
@@ -55,7 +52,7 @@ def parse_dates(start_date_str: str, end_date_str: str):
     return start_dt, end_dt
 
 
-# -------------------- DASHBOARD --------------------
+# ---------------- DASHBOARD ----------------
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request, start_date: str = None, end_date: str = None, db: Session = Depends(get_db)):
@@ -73,64 +70,41 @@ def home(request: Request, start_date: str = None, end_date: str = None, db: Ses
     s_month_q = db.query(Shipment).filter(Shipment.created_at >= month_start)
     r_month_q = db.query(func.sum(Shipment.rate)).filter(Shipment.created_at >= month_start)
 
-    if start_dt or end_dt:
-        base_q = db.query(Shipment)
-        rev_q = db.query(func.sum(Shipment.rate))
-
-        if start_dt:
-            base_q = base_q.filter(Shipment.created_at >= start_dt)
-            rev_q = rev_q.filter(Shipment.created_at >= start_dt)
-
-        if end_dt:
-            base_q = base_q.filter(Shipment.created_at <= end_dt)
-            rev_q = rev_q.filter(Shipment.created_at <= end_dt)
-
-        shipments_today = base_q.count()
-        revenue_today = rev_q.scalar() or 0
-        shipments_month = shipments_today
-        revenue_month = revenue_today
-    else:
-        shipments_today = s_today_q.count()
-        revenue_today = r_today_q.scalar() or 0
-        shipments_month = s_month_q.count()
-        revenue_month = r_month_q.scalar() or 0
+    shipments_today = s_today_q.count()
+    revenue_today = r_today_q.scalar() or 0
+    shipments_month = s_month_q.count()
+    revenue_month = r_month_q.scalar() or 0
 
     total_customers = db.query(Customer).count()
     repeat_customers = db.query(Customer).filter(Customer.total_shipments > 1).count()
     repeat_percent = round((repeat_customers / total_customers) * 100, 1) if total_customers else 0
 
-    # -------- Chart Data --------
     chart_days = 14
-    chart_start = (now - timedelta(days=chart_days - 1)).replace(
-        hour=0, minute=0, second=0, microsecond=0
-    )
+    chart_start = (now - timedelta(days=chart_days-1)).replace(hour=0, minute=0, second=0, microsecond=0)
 
     daily_revenue_data = db.query(
-        cast(Shipment.created_at, Date).label("date"),
-        func.sum(Shipment.rate).label("revenue")
+        cast(Shipment.created_at, Date),
+        func.sum(Shipment.rate)
     ).filter(
         Shipment.created_at >= chart_start
     ).group_by(
         cast(Shipment.created_at, Date)
     ).all()
 
-    revenue_dict = {}
-    for r in daily_revenue_data:
-        d_str = r.date if isinstance(r.date, str) else r.date.strftime("%Y-%m-%d")
-        revenue_dict[d_str] = r.revenue
+    revenue_dict = {
+        (r[0] if isinstance(r[0], str) else r[0].strftime("%Y-%m-%d")): r[1]
+        for r in daily_revenue_data
+    }
 
-    revenue_chart_labels = []
-    revenue_chart_data = []
-
+    labels, data = [], []
     for i in range(chart_days):
         day = chart_start + timedelta(days=i)
-        day_str = day.strftime("%Y-%m-%d")
-        revenue_chart_labels.append(day.strftime("%b %d"))
-        revenue_chart_data.append(revenue_dict.get(day_str, 0))
+        labels.append(day.strftime("%b %d"))
+        data.append(revenue_dict.get(day.strftime("%Y-%m-%d"), 0))
 
     top_customers = db.query(
         Customer.phone,
-        func.sum(Shipment.rate).label("revenue")
+        func.sum(Shipment.rate)
     ).join(Shipment).filter(
         Shipment.created_at >= month_start
     ).group_by(Customer.id).order_by(
@@ -145,15 +119,13 @@ def home(request: Request, start_date: str = None, end_date: str = None, db: Ses
         "revenue_month": int(revenue_month),
         "total_customers": total_customers,
         "repeat_percent": repeat_percent,
-        "start_date": start_date or "",
-        "end_date": end_date or "",
-        "chart_labels": revenue_chart_labels,
-        "chart_data": revenue_chart_data,
+        "chart_labels": labels,
+        "chart_data": data,
         "top_customers": top_customers
     })
 
 
-# -------------------- PIN --------------------
+# ---------------- PIN ----------------
 
 @app.get("/pin", response_class=HTMLResponse)
 def pin_page(request: Request):
@@ -169,7 +141,14 @@ def submit_pin(pin: str = Form(...)):
     return RedirectResponse("/pin", status_code=302)
 
 
-# -------------------- ADD SHIPMENT --------------------
+# ---------------- ADD PAGE (FIXED) ----------------
+
+@app.get("/add", response_class=HTMLResponse)
+def add_page(request: Request):
+    if not is_authenticated(request):
+        return RedirectResponse("/pin")
+    return templates.TemplateResponse("add.html", {"request": request})
+
 
 @app.post("/add")
 def add_shipment(
@@ -182,13 +161,6 @@ def add_shipment(
 ):
     if not is_authenticated(request):
         return RedirectResponse("/pin")
-
-    phone = "".join(filter(str.isdigit, phone))
-
-    if not phone.startswith("91") and len(phone) == 10:
-        phone = "91" + phone
-    elif len(phone) > 10 and phone.startswith("0"):
-        phone = "91" + phone[1:]
 
     now = get_ist_time()
 
@@ -209,7 +181,7 @@ def add_shipment(
 
     shipment = Shipment(
         tracking_id=tracking_id,
-        destination_city=destination_city.strip().upper(),
+        destination_city=destination_city.upper(),
         rate=rate,
         customer_id=customer.id
     )
@@ -217,67 +189,25 @@ def add_shipment(
     db.add(shipment)
     db.commit()
 
-    whatsapp_url = f"https://wa.me/{phone}?text={quote('Shipment booked successfully')}"
-    return RedirectResponse(whatsapp_url, status_code=302)
+    return RedirectResponse("/", status_code=302)
 
 
-# -------------------- SHIPMENTS --------------------
+# ---------------- CUSTOMERS ----------------
 
-@app.get("/shipments", response_class=HTMLResponse)
-def shipments_page(request: Request, db: Session = Depends(get_db)):
+@app.get("/customers", response_class=HTMLResponse)
+def customers_page(request: Request, db: Session = Depends(get_db)):
     if not is_authenticated(request):
         return RedirectResponse("/pin")
 
-    shipments = db.query(Shipment).join(Customer)\
-        .order_by(Shipment.created_at.desc())\
-        .limit(200).all()
+    customers = db.query(Customer).order_by(Customer.last_visit.desc()).all()
 
-    return templates.TemplateResponse("shipments.html", {
+    return templates.TemplateResponse("customers.html", {
         "request": request,
-        "shipments": shipments
+        "customers": customers
     })
 
 
-# -------------------- EXPORT --------------------
-
-@app.get("/export-shipments")
-def export_shipments(request: Request, db: Session = Depends(get_db)):
-    if not is_authenticated(request):
-        return RedirectResponse("/pin")
-
-    shipments = db.query(Shipment).join(Customer).all()
-
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.append(['Tracking ID', 'Phone', 'City', 'Rate', 'Status', 'Date'])
-
-    for s in shipments:
-        ws.append([
-            s.tracking_id,
-            s.customer.phone if s.customer else '',
-            s.destination_city,
-            s.rate,
-            s.status,
-            s.created_at.strftime("%Y-%m-%d %H:%M")
-        ])
-
-    stream = io.BytesIO()
-    wb.save(stream)
-    stream.seek(0)
-
-    filename = f"shipments_{get_ist_time().strftime('%Y%m%d')}"
-
-    response = StreamingResponse(
-        iter([stream.getvalue()]),
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-
-    response.headers["Content-Disposition"] = f"attachment; filename={filename}.xlsx"
-
-    return response
-
-
-# -------------------- INSIGHTS --------------------
+# ---------------- INSIGHTS ----------------
 
 @app.get("/insights", response_class=HTMLResponse)
 def insights_page(request: Request, db: Session = Depends(get_db)):
