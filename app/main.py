@@ -446,4 +446,3 @@ def insights_page(request: Request, start_date: str = None, end_date: str = None
         "start_date": start_date or "",
         "end_date": end_date or ""
     })
-~
