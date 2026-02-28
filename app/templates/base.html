@@ -3,100 +3,178 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DTDC CRM | Enterprise</title>
     <!-- Modern Typography -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'dtdc-blue': '#003366',
+                        'dtdc-red': '#e31e24',
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 20px rgba(227, 30, 36, 0.25)',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body {
-            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            /* Create a very subtle, premium background */
+            background-color: #f8fafc;
+            background-image:
+                radial-gradient(at 0% 0%, hsla(211, 40%, 96%, 1) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(209, 50%, 95%, 1) 0px, transparent 50%);
         }
 
+        /* Elegant, refined glassmorphism */
         .glass-nav {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-top: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.03);
         }
 
         .card-blur {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s ease-out;
         }
 
-        .dtdc-blue {
-            color: #003366;
+        .card-blur:active {
+            transform: scale(0.99);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
         }
 
-        .dtdc-red {
-            color: #e31e24;
+        /* Custom subtle scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
         }
 
-        .bg-dtdc-blue {
-            background-color: #003366;
+        ::-webkit-scrollbar-track {
+            background: transparent;
         }
 
-        .bg-dtdc-red {
-            background-color: #e31e24;
+        ::-webkit-scrollbar-thumb {
+            background: rgba(203, 213, 225, 0.5);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.8);
         }
     </style>
 </head>
 
-<body class="bg-gray-50 text-slate-900 min-h-screen pb-28">
+<body class="text-slate-900 min-h-screen pb-28 pt-2">
 
     <!-- Top Branding -->
-    <header class="p-6 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-dtdc-red rounded-lg flex items-center justify-center text-white font-bold italic">D
+    <header
+        class="p-5 flex items-center justify-between sticky top-0 bg-[#f8fafc]/80 backdrop-blur-xl z-40 mb-2 border-b border-slate-200/50">
+        <div class="flex items-center gap-3">
+            <!-- Refined Logo -->
+            <div
+                class="w-10 h-10 bg-gradient-to-br from-dtdc-red to-[#b0161a] rounded-xl flex items-center justify-center text-white font-black italic shadow-md shadow-red-200">
+                <span class="text-xl">D</span>
             </div>
-            <h1 class="text-xl font-bold tracking-tight text-slate-800">DTDC <span class="text-dtdc-blue">CRM</span>
-            </h1>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight text-slate-800">DTDC <span class="text-dtdc-blue">CRM</span>
+                </h1>
+                <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Franchise Portal</p>
+            </div>
         </div>
-        <div class="w-10 h-10 bg-white rounded-full shadow-sm border border-gray-100 flex items-center justify-center">
-            <i data-lucide="user" class="w-5 h-5 text-slate-500"></i>
+        <!-- Refined Profile Icon -->
+        <div
+            class="w-10 h-10 bg-white rounded-full shadow-soft border border-gray-100 flex items-center justify-center cursor-pointer hover:bg-slate-50 transition-colors">
+            <i data-lucide="user" class="w-5 h-5 text-slate-600"></i>
         </div>
     </header>
 
-    <main class="px-4 md:px-8 max-w-7xl mx-auto pb-4">
+    <main class="px-5 sm:px-8 max-w-2xl mx-auto pb-8">
         {% block content %}{% endblock %}
     </main>
 
     <!-- Bottom Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 glass-nav h-20 px-6 sm:px-10 flex items-center justify-between z-50">
-        <a href="/" class="flex flex-col items-center gap-1 group">
-            <div class="p-2 rounded-xl group-hover:bg-blue-50 transition-colors">
-                <i data-lucide="layout-dashboard" class="w-6 h-6 text-slate-500 group-hover:text-dtdc-blue"></i>
-            </div>
-            <span class="text-[10px] font-medium text-slate-500 group-hover:text-dtdc-blue">Home</span>
-        </a>
-        <a href="/shipments" class="flex flex-col items-center gap-1 group">
-            <div class="p-2 rounded-xl group-hover:bg-blue-50 transition-colors">
-                <i data-lucide="package" class="w-6 h-6 text-slate-500 group-hover:text-dtdc-blue"></i>
-            </div>
-            <span class="text-[10px] font-medium text-slate-500 group-hover:text-dtdc-blue">Tracking</span>
-        </a>
-        <a href="/add" class="relative -top-6">
+    <!-- Reduced height, elegant proportions, protected touch areas with padding rather than bulk -->
+    <nav class="fixed bottom-0 left-0 right-0 glass-nav h-[72px] px-3 sm:px-8 flex items-center justify-between z-50">
+
+        <a href="/" class="flex flex-col items-center gap-1 p-2 flex-1 group active:scale-95 transition-transform"
+            aria-label="Home">
             <div
-                class="w-14 h-14 bg-dtdc-red shadow-lg shadow-red-200 rounded-full flex items-center justify-center text-white ring-4 ring-white">
-                <i data-lucide="plus" class="w-8 h-8"></i>
+                class="p-1.5 rounded-xl transition-colors {{ 'bg-blue-50/80 text-dtdc-blue' if request.path == '/' else 'text-slate-400 hover:bg-slate-50' }}">
+                <i data-lucide="layout-dashboard"
+                    class="w-[22px] h-[22px] {{ 'text-dtdc-blue fill-blue-50/50' if request.path == '/' else 'group-hover:text-slate-600' }}"></i>
             </div>
+            <span
+                class="text-[9px] font-semibold tracking-wide {{ 'text-dtdc-blue' if request.path == '/' else 'text-slate-400' }}">Home</span>
         </a>
-        <a href="/customers" class="flex flex-col items-center gap-1 group">
-            <div class="p-2 rounded-xl group-hover:bg-blue-50 transition-colors">
-                <i data-lucide="users" class="w-6 h-6 text-slate-500 group-hover:text-dtdc-blue"></i>
+
+        <a href="/shipments"
+            class="flex flex-col items-center gap-1 p-2 flex-1 group active:scale-95 transition-transform"
+            aria-label="Tracking">
+            <div
+                class="p-1.5 rounded-xl transition-colors {{ 'bg-blue-50/80 text-dtdc-blue' if request.path.startswith('/shipments') else 'text-slate-400 hover:bg-slate-50' }}">
+                <i data-lucide="package"
+                    class="w-[22px] h-[22px] {{ 'text-dtdc-blue fill-blue-50/50' if request.path.startswith('/shipments') else 'group-hover:text-slate-600' }}"></i>
             </div>
-            <span class="text-[10px] font-medium text-slate-500 group-hover:text-dtdc-blue">Clients</span>
+            <span
+                class="text-[9px] font-semibold tracking-wide {{ 'text-dtdc-blue' if request.path.startswith('/shipments') else 'text-slate-400' }}">Tracking</span>
         </a>
-        <a href="/insights" class="flex flex-col items-center gap-1 group">
-            <div class="p-2 rounded-xl group-hover:bg-blue-50 transition-colors">
-                <i data-lucide="bar-chart-3" class="w-6 h-6 text-slate-500 group-hover:text-dtdc-blue"></i>
+
+        <!-- Elegant Central Action Button -->
+        <div class="relative flex-1 flex justify-center mt-[-32px]">
+            <a href="/add" class="active:scale-95 transition-transform flex flex-col items-center"
+                aria-label="New Booking">
+                <!-- Soft glow, beautiful gradient, reasonable size (56x56) -->
+                <div
+                    class="w-14 h-14 bg-gradient-to-b from-dtdc-red to-[#cc1920] shadow-glow rounded-full flex items-center justify-center text-white border-4 border-white relative z-10 box-content">
+                    <i data-lucide="plus" class="w-7 h-7" stroke-width="2.5"></i>
+                </div>
+                <span class="text-[10px] font-bold text-dtdc-red mt-1.5">Book</span>
+            </a>
+        </div>
+
+        <a href="/customers"
+            class="flex flex-col items-center gap-1 p-2 flex-1 group active:scale-95 transition-transform"
+            aria-label="Clients">
+            <div
+                class="p-1.5 rounded-xl transition-colors {{ 'bg-blue-50/80 text-dtdc-blue' if request.path.startswith('/customers') else 'text-slate-400 hover:bg-slate-50' }}">
+                <i data-lucide="users"
+                    class="w-[22px] h-[22px] {{ 'text-dtdc-blue fill-blue-50/50' if request.path.startswith('/customers') else 'group-hover:text-slate-600' }}"></i>
             </div>
-            <span class="text-[10px] font-medium text-slate-500 group-hover:text-dtdc-blue">Growth</span>
+            <span
+                class="text-[9px] font-semibold tracking-wide {{ 'text-dtdc-blue' if request.path.startswith('/customers') else 'text-slate-400' }}">Clients</span>
         </a>
+
+        <a href="/insights"
+            class="flex flex-col items-center gap-1 p-2 flex-1 group active:scale-95 transition-transform"
+            aria-label="Growth">
+            <div
+                class="p-1.5 rounded-xl transition-colors {{ 'bg-blue-50/80 text-dtdc-blue' if request.path.startswith('/insights') else 'text-slate-400 hover:bg-slate-50' }}">
+                <i data-lucide="bar-chart-3"
+                    class="w-[22px] h-[22px] {{ 'text-dtdc-blue fill-blue-50/50' if request.path.startswith('/insights') else 'group-hover:text-slate-600' }}"></i>
+            </div>
+            <span
+                class="text-[9px] font-semibold tracking-wide {{ 'text-dtdc-blue' if request.path.startswith('/insights') else 'text-slate-400' }}">Growth</span>
+        </a>
+
     </nav>
 
     <script>
