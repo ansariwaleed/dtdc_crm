@@ -1,70 +1,86 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="mb-5 flex items-center justify-between">
     <div>
-        <h2 class="text-2xl font-bold text-slate-800">Tracking Logs</h2>
-        <p class="text-sm text-slate-500">Manage all booked shipments</p>
+        <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Tracking Logs</h2>
+        <p class="text-sm font-medium text-slate-500 mt-0.5">Manage booked shipments</p>
     </div>
+
+    <!-- Refined Export Button -->
     <a href="/export-shipments?status={{ status }}&q={{ q }}&start_date={{ start_date }}&end_date={{ end_date }}"
-        class="inline-flex items-center gap-2 bg-green-600/10 text-green-700 px-4 py-2 rounded-xl text-sm font-bold hover:bg-green-600/20 transition-colors max-w-fit">
-        <i data-lucide="download" class="w-4 h-4"></i>
-        Export Excel
+        class="flex items-center gap-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors px-3 py-2 rounded-xl text-xs font-bold border border-emerald-100/50 shadow-sm">
+        <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+        Export
     </a>
 </div>
 
-<!-- Toast Notification -->
-<div id="toast" style="display:none;" class="mb-6">
-    <div
-        class="bg-green-600 text-white px-6 py-3 rounded-2xl flex items-center gap-3 shadow-lg shadow-green-100 border border-green-500">
-        <i data-lucide="check-circle" class="w-5 h-5"></i>
-        <span id="toastMsg" class="text-xs font-bold tracking-wide uppercase">Success</span>
+<!-- Refined Toast -->
+<div id="toast" style="display:none;"
+    class="mb-4 fixed top-4 right-4 z-[100] transition-all transform origin-top border border-slate-200 shadow-xl rounded-2xl bg-white overflow-hidden">
+    <div class="flex items-center">
+        <div class="bg-emerald-500 p-4">
+            <i data-lucide="check" class="w-5 h-5 text-white"></i>
+        </div>
+        <div class="px-4 py-3">
+            <p id="toastMsg" class="text-sm font-bold text-slate-800 tracking-tight">Success</p>
+        </div>
     </div>
 </div>
 
-<!-- Search & Filter Bar -->
-<form method="get" class="mb-6 flex flex-col md:flex-row gap-3">
+<!-- Elegant Search & Filter Integration -->
+<form method="get" class="mb-6 space-y-3">
     <input type="hidden" name="status" value="{{ status }}">
 
-    <div class="relative flex-1">
-        <input type="text" name="q" value="{{ q }}" placeholder="Search ID, City or Phone..."
-            class="w-full bg-white border border-gray-200 rounded-2xl py-3 px-12 focus:ring-2 focus:ring-blue-100 focus:border-dtdc-blue outline-none transition-all shadow-sm">
-        <i data-lucide="search" class="absolute left-4 top-3.5 w-5 h-5 text-slate-400"></i>
-        {% if q %}
-        <a href="/shipments?status={{ status }}&start_date={{ start_date }}&end_date={{ end_date }}"
-            class="absolute right-4 top-3.5 text-slate-400 hover:text-slate-600">
-            <i data-lucide="x-circle" class="w-5 h-5"></i>
-        </a>
-        {% endif %}
-    </div>
+    <div class="flex flex-col sm:flex-row gap-3">
+        <!-- Sleek Search Bar -->
+        <div class="relative flex-1 group">
+            <input type="text" name="q" value="{{ q }}" placeholder="Search ID, City or Phone..."
+                class="w-full bg-white border border-slate-200/80 rounded-xl py-3 pl-11 pr-10 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-100 focus:border-dtdc-blue outline-none transition-all shadow-sm placeholder:font-medium placeholder:text-slate-400">
+            <i data-lucide="search"
+                class="absolute left-4 top-[14px] w-4 h-4 text-slate-400 group-focus-within:text-dtdc-blue transition-colors"></i>
+            {% if q %}
+            <a href="/shipments?status={{ status }}&start_date={{ start_date }}&end_date={{ end_date }}"
+                class="absolute right-3 top-[10px] p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-colors">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </a>
+            {% endif %}
+        </div>
 
-    <div class="flex items-center gap-2 bg-white/50 p-1.5 rounded-2xl shadow-sm border border-white shrink-0">
-        <input type="date" name="start_date" value="{{ start_date }}"
-            class="text-xs bg-transparent border-none focus:ring-0 text-slate-600 font-medium cursor-pointer">
-        <span class="text-slate-300">-</span>
-        <input type="date" name="end_date" value="{{ end_date }}"
-            class="text-xs bg-transparent border-none focus:ring-0 text-slate-600 font-medium cursor-pointer">
-        <button type="submit" class="bg-dtdc-blue text-white p-2 text-xs rounded-xl hover:bg-blue-700 transition"
-            title="Apply Filter">
-            <i data-lucide="filter" class="w-4 h-4"></i>
-        </button>
-        {% if start_date or end_date %}
-        <a href="/shipments?status={{ status }}&q={{ q }}"
-            class="text-slate-400 p-2 hover:text-slate-600 rounded-xl transition" title="Clear Dates">
-            <i data-lucide="x-circle" class="w-4 h-4"></i>
-        </a>
-        {% endif %}
+        <!-- Elegant Date Filter -->
+        <div class="flex items-center gap-1.5 bg-white p-1.5 rounded-xl border border-slate-200/80 shadow-sm shrink-0">
+            <input type="date" name="start_date" value="{{ start_date }}"
+                class="bg-transparent border-none text-xs font-semibold text-slate-600 focus:ring-0 outline-none w-28 cursor-pointer">
+            <span class="text-slate-300">→</span>
+            <input type="date" name="end_date" value="{{ end_date }}"
+                class="bg-transparent border-none text-xs font-semibold text-slate-600 focus:ring-0 outline-none w-28 cursor-pointer">
+
+            <div class="flex items-center pl-1 border-l border-slate-100">
+                <button type="submit"
+                    class="p-1.5 bg-slate-50 text-dtdc-blue hover:bg-blue-50 rounded-lg transition-colors border border-slate-100"
+                    title="Apply Filter">
+                    <i data-lucide="filter" class="w-4 h-4"></i>
+                </button>
+                {% if start_date or end_date %}
+                <a href="/shipments?status={{ status }}&q={{ q }}"
+                    class="p-1.5 ml-1 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
+                    title="Clear dates">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </form>
 
-<!-- Filter Tabs -->
-<div class="flex bg-white/50 p-1 rounded-2xl mb-6 shadow-sm border border-white max-w-xs">
+<!-- Refined Segmented Control Tabs -->
+<div class="flex bg-slate-100/70 p-1 rounded-xl mb-6 shadow-inner border border-slate-200/50 max-w-sm mx-auto">
     <a href="/shipments?status=BOOKED&q={{ q }}&start_date={{ start_date }}&end_date={{ end_date }}"
-        class="flex-1 py-2 px-4 rounded-xl text-center text-xs font-bold transition-all {{ 'bg-dtdc-blue text-white shadow-md' if status == 'BOOKED' else 'text-slate-500 hover:text-slate-800' }}">
-        In Transit
+        class="flex-1 py-2 px-3 rounded-lg text-center text-xs uppercase tracking-widest font-bold transition-all {{ 'bg-white text-dtdc-blue shadow-sm border border-slate-50' if status == 'BOOKED' else 'text-slate-500 hover:text-slate-700' }}">
+        Tracking
     </a>
     <a href="/shipments?status=DELIVERED&q={{ q }}&start_date={{ start_date }}&end_date={{ end_date }}"
-        class="flex-1 py-2 px-4 rounded-xl text-center text-xs font-bold transition-all {{ 'bg-green-600 text-white shadow-md' if status == 'DELIVERED' else 'text-slate-500 hover:text-slate-800' }}">
+        class="flex-1 py-2 px-3 rounded-lg text-center text-xs uppercase tracking-widest font-bold transition-all {{ 'bg-white text-emerald-600 shadow-sm border border-slate-50' if status == 'DELIVERED' else 'text-slate-500 hover:text-slate-700' }}">
         Delivered
     </a>
 </div>
@@ -72,89 +88,111 @@
 <div id="shipmentsList" class="space-y-4">
     {% for shipment in shipments %}
     <div id="card-{{ shipment.id }}"
-        class="card-blur p-5 rounded-3xl border border-white shadow-sm flex items-center justify-between group"
-        style="transition: all 0.3s ease;">
-        <div class="flex items-center gap-4">
+        class="card-blur p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 group transition-shadow hover:shadow-md"
+        style="transition: all 0.25s ease;">
+
+        <!-- Info Section -->
+        <div class="flex items-center gap-3.5">
+            <!-- Sleek Status Icon -->
             <div
-                class="w-12 h-12 {{ 'bg-green-50' if shipment.status == 'DELIVERED' else 'bg-blue-50' }} rounded-2xl flex items-center justify-center">
-                <i data-lucide="{{ 'check-circle' if shipment.status == 'DELIVERED' else 'package' }}"
-                    class="w-6 h-6 {{ 'text-green-600' if shipment.status == 'DELIVERED' else 'text-dtdc-blue' }}"></i>
+                class="w-10 h-10 shrink-0 {{ 'bg-emerald-50/80 border-emerald-100/50' if shipment.status == 'DELIVERED' else 'bg-blue-50/80 border-blue-100/50' }} rounded-xl flex items-center justify-center border shadow-inner">
+                <i data-lucide="{{ 'check' if shipment.status == 'DELIVERED' else 'package' }}"
+                    class="w-5 h-5 {{ 'text-emerald-500' if shipment.status == 'DELIVERED' else 'text-dtdc-blue' }}"></i>
             </div>
-            <div>
+
+            <div class="min-w-0">
                 <a href="https://trackcourier.io/track-and-trace/dtdc/{{ shipment.tracking_id }}" target="_blank"
-                    class="font-bold text-slate-800 tracking-tight hover:text-dtdc-blue hover:underline transition-colors block">
+                    class="font-bold text-base text-slate-800 tracking-tight hover:text-dtdc-blue hover:underline decoration-blue-200 underline-offset-4 transition-all block truncate">
                     {{ shipment.tracking_id }}
                 </a>
-                <p class="text-xs font-medium text-slate-500 uppercase tracking-widest">{{ shipment.destination_city }}
-                </p>
+                <div class="flex items-center gap-2 mt-0.5">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate">{{
+                        shipment.destination_city }}</span>
+                    <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                    <span class="text-[10px] font-semibold text-slate-400">{{ shipment.created_at.strftime('%d %b')
+                        }}</span>
+                </div>
             </div>
         </div>
 
-        <div class="text-right flex items-center gap-3">
-            <div>
-                <p class="font-bold text-slate-800">₹{{ shipment.rate|int }}</p>
-                <p class="text-[10px] text-slate-400 font-medium">{{ shipment.created_at.strftime('%d %b, %H:%M') }}</p>
+        <!-- Action & Price Section -->
+        <div
+            class="flex items-center justify-between sm:justify-end gap-5 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 border-dashed">
+            <div class="text-left sm:text-right">
+                <p class="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-0.5 hidden sm:block">Amount
+                </p>
+                <p class="text-lg font-bold text-slate-800 tracking-tight font-mono">₹{{ shipment.rate|int }}</p>
             </div>
 
-            <div class="flex items-center gap-1">
+            <!-- Elegant Actions -->
+            <div class="flex items-center gap-2">
                 {% if shipment.status == 'BOOKED' %}
+                <!-- Accessible but not massive text button -->
                 <button
-                    onclick="doAction(this, '/deliver-shipment/{{ shipment.id }}', '{{ shipment.id }}', 'text-green-600', 'text-slate-400')"
-                    class="p-2 text-slate-400 hover:text-green-600 transition-colors" title="Mark Delivered">
-                    <i data-lucide="check-circle-2" class="w-5 h-5 pointer-events-none"></i>
+                    onclick="doAction(this, '/deliver-shipment/{{ shipment.id }}', '{{ shipment.id }}', 'bg-emerald-600 text-white shadow-emerald-200', 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100')"
+                    class="px-3 py-2 rounded-xl text-xs font-bold transition-all bg-emerald-50 text-emerald-600 border border-emerald-100/50 hover:bg-emerald-100 flex items-center gap-1.5 focus:ring-2 focus:ring-emerald-200 outline-none">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 pointer-events-none"></i>
+                    <span class="pointer-events-none">Deliver</span>
                 </button>
                 {% endif %}
 
+                <!-- Icon button with safe padding block -->
                 <button
-                    onclick="doAction(this, '/delete-shipment/{{ shipment.id }}', '{{ shipment.id }}', 'text-red-600', 'text-slate-400')"
-                    class="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Delete">
-                    <i data-lucide="trash-2" class="w-5 h-5 pointer-events-none"></i>
+                    onclick="doAction(this, '/delete-shipment/{{ shipment.id }}', '{{ shipment.id }}', 'bg-red-500 text-white border-red-500', 'text-slate-400 hover:bg-red-50 hover:text-red-500 hover:border-red-100 border-transparent')"
+                    class="p-2.5 rounded-xl transition-all border outline-none {{ 'text-red-500 bg-red-50 border-red-100 hover:bg-red-100 shadow-sm' if shipment.status == 'DELIVERED' else 'text-slate-400 hover:bg-red-50 hover:text-red-500 border-transparent' }}"
+                    title="Delete">
+                    <i data-lucide="trash-2" class="w-[18px] h-[18px] pointer-events-none"></i>
                 </button>
             </div>
         </div>
     </div>
     {% else %}
-    <div class="text-center py-20">
-        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <i data-lucide="search-x" class="w-10 h-10 text-gray-300"></i>
+    <!-- Sleek Empty State -->
+    <div
+        class="text-center py-16 bg-white/50 backdrop-blur-sm rounded-[32px] border border-slate-200/60 shadow-sm mt-6">
+        <div
+            class="w-16 h-16 bg-slate-100/80 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-200">
+            <i data-lucide="search-x" class="w-8 h-8 text-slate-400"></i>
         </div>
-        <p class="text-slate-500 font-medium">No shipments found</p>
+        <p class="text-base font-bold text-slate-700 tracking-tight mb-1">No shipments found</p>
+        <p class="text-xs font-medium text-slate-500">Adjust filters or search parameters.</p>
     </div>
     {% endfor %}
 </div>
 
 <script>
-    // Store timeouts to clear them if clicked again
     var confirmTimeouts = {};
 
-    function doAction(buttonEl, url, cardId, confirmColorClass, defaultColorClass) {
-        // If the button is not already in the 'confirm' state
+    function doAction(buttonEl, url, cardId, confirmClassStr, defaultClassStr) {
+        var defaultClasses = defaultClassStr.split(' ');
+        var confirmClasses = confirmClassStr.split(' ');
+
         if (!buttonEl.dataset.confirming) {
             buttonEl.dataset.confirming = 'true';
 
-            // visually change button to represent confirmation state
-            buttonEl.classList.remove(defaultColorClass);
-            buttonEl.classList.remove(confirmColorClass.replace('text-', 'hover:text-'));
-            buttonEl.classList.add(confirmColorClass);
-            buttonEl.classList.add('bg-gray-100');
-            buttonEl.classList.add('rounded-full');
+            buttonEl.classList.remove(...defaultClasses);
+            buttonEl.classList.add(...confirmClasses);
 
-            // Reset after 3 seconds if not confirmed
+            var span = buttonEl.querySelector('span');
+            if (span) {
+                var oldText = span.innerText;
+                span.innerText = "Sure?";
+                buttonEl.dataset.oldText = oldText;
+            } else {
+                buttonEl.classList.add('px-3');
+            }
+
             confirmTimeouts[cardId + url] = setTimeout(function () {
                 delete buttonEl.dataset.confirming;
-                buttonEl.classList.remove(confirmColorClass);
-                buttonEl.classList.remove('bg-gray-100');
-                buttonEl.classList.remove('rounded-full');
-                buttonEl.classList.add(defaultColorClass);
-                buttonEl.classList.add(confirmColorClass.replace('text-', 'hover:text-'));
+                buttonEl.classList.remove(...confirmClasses);
+                buttonEl.classList.add(...defaultClasses);
+                if (span) span.innerText = buttonEl.dataset.oldText;
+                else buttonEl.classList.remove('px-3');
             }, 3000);
             return;
         }
 
-        // If it WAS in confirming state, proceed with action!
         clearTimeout(confirmTimeouts[cardId + url]);
-
-        // Disable button while processing
         buttonEl.style.opacity = '0.5';
         buttonEl.style.pointerEvents = 'none';
 
@@ -168,9 +206,10 @@
                     if (data.ok) {
                         var card = document.getElementById('card-' + cardId);
                         if (card) {
+                            // Elegant fade out
                             card.style.opacity = '0';
-                            card.style.transform = 'translateX(100px)';
-                            setTimeout(function () { card.remove(); }, 300);
+                            card.style.transform = 'translateY(10px) scale(0.98)';
+                            setTimeout(function () { card.remove(); }, 250);
                         }
                         showToast(data.msg);
                     } else {
@@ -192,8 +231,25 @@
         var toast = document.getElementById('toast');
         var toastMsg = document.getElementById('toastMsg');
         toastMsg.textContent = msg;
+
+        // Ensure reset state before animating
         toast.style.display = 'block';
-        setTimeout(function () { toast.style.display = 'none'; }, 3000);
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-20px) scale(0.95)';
+
+        // Force reflow
+        void toast.offsetWidth;
+
+        // Animate in
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0) scale(1)';
+
+        setTimeout(function () {
+            // Animate out
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-20px) scale(0.95)';
+            setTimeout(function () { toast.style.display = 'none'; }, 300);
+        }, 2500);
     }
 </script>
 
