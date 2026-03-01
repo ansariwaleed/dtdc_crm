@@ -222,8 +222,6 @@ Tracking Details:
 • Destination: {destination_city.upper()}
 • Charges: ₹{formatted_rate}
 
-Track your shipment: {tracking_link}
-
 Visit Our Office: {gmap_link}
 
 Track your shipment: {tracking_link}
