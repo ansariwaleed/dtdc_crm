@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+
 <div class="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-2">
     <div>
         <h2 class="text-2xl font-bold text-slate-800 tracking-tight">New Booking</h2>
@@ -10,63 +11,55 @@
 
 <div class="card-blur p-6 sm:p-8 rounded-[32px] max-w-xl mx-auto shadow-sm relative overflow-hidden">
 
-    <div class="absolute -right-20 -top-20 w-40 h-40 bg-gradient-to-br from-red-50 to-transparent rounded-full blur-3xl opacity-60"></div>
-
     <form id="bookingForm"
         method="post"
         action="/add"
-        class="space-y-5 relative z-10"
         target="_blank"
+        class="space-y-5"
         onsubmit="handleFormSubmit()">
 
         <!-- PHONE -->
-        <div class="space-y-1.5">
-            <label class="flex items-center justify-between px-1">
-                <span class="text-xs font-bold text-slate-600 uppercase tracking-widest">
-                    Customer Mobile
-                </span>
-                <span class="text-[10px] font-semibold text-slate-400">Required</span>
-            </label>
+        <div>
+            <label class="text-xs font-bold text-slate-600 uppercase">Customer Mobile</label>
 
-            <div class="relative group">
+            <div class="relative mt-1">
                 <input type="tel"
                     name="phone"
-                    placeholder="9876543210"
                     pattern="[0-9]{10}"
                     maxlength="10"
-                    class="w-full bg-slate-50/80 border border-slate-200/60 rounded-xl py-3.5 px-12 text-base font-semibold tracking-wide focus:border-dtdc-blue focus:ring-[3px] focus:ring-blue-100/50 focus:bg-white transition-all text-slate-800 outline-none shadow-sm"
+                    placeholder="9876543210"
+                    class="w-full border rounded-xl py-3 px-10 font-semibold"
                     required>
 
                 <i data-lucide="phone"
-                    class="absolute left-4 top-[15px] w-5 h-5 text-slate-400"></i>
+                    class="absolute left-3 top-[14px] w-5 h-5 text-slate-400"></i>
             </div>
         </div>
 
 
-        <!-- TRACKING ID + SCANNER -->
-        <div class="space-y-1.5">
-            <label class="block text-xs font-bold text-slate-600 px-1 uppercase tracking-widest">
+        <!-- TRACKING + SCAN -->
+        <div>
+            <label class="text-xs font-bold text-slate-600 uppercase">
                 Tracking ID (AWB)
             </label>
 
-            <div class="flex gap-2">
+            <div class="flex gap-2 mt-1">
 
                 <div class="relative flex-1">
                     <input id="trackingInput"
-                        type="text"
                         name="tracking_id"
-                        placeholder="e.g. D12345678"
-                        class="w-full bg-slate-50/80 border border-slate-200/60 rounded-xl py-3.5 px-12 text-base font-bold uppercase focus:border-dtdc-blue focus:ring-[3px] focus:ring-blue-100/50 focus:bg-white transition-all text-slate-800 outline-none shadow-sm"
+                        type="text"
+                        placeholder="D12345678"
+                        class="w-full border rounded-xl py-3 px-10 font-bold uppercase"
                         required>
 
                     <i data-lucide="hash"
-                        class="absolute left-4 top-[15px] w-5 h-5 text-slate-400"></i>
+                        class="absolute left-3 top-[14px] w-5 h-5 text-slate-400"></i>
                 </div>
 
-                <!-- SCAN BUTTON -->
                 <button type="button"
                     onclick="startScanner()"
-                    class="px-4 rounded-xl bg-slate-900 text-white flex items-center gap-2 hover:bg-black transition">
+                    class="px-4 bg-black text-white rounded-xl flex items-center gap-2">
                     <i data-lucide="scan-line" class="w-4 h-4"></i>
                     Scan
                 </button>
@@ -75,75 +68,65 @@
         </div>
 
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
+        <!-- DESTINATION -->
+        <div>
+            <label class="text-xs font-bold text-slate-600 uppercase">Destination</label>
 
-            <!-- DESTINATION -->
-            <div class="space-y-1.5">
-                <label class="block text-xs font-bold text-slate-600 px-1 uppercase tracking-widest">
-                    Destination
-                </label>
+            <div class="relative mt-1">
+                <input type="text"
+                    name="destination_city"
+                    placeholder="City Name"
+                    class="w-full border rounded-xl py-3 px-10 font-semibold"
+                    required>
 
-                <div class="relative group">
-                    <input type="text"
-                        name="destination_city"
-                        placeholder="City Name"
-                        class="w-full bg-slate-50/80 border border-slate-200/60 rounded-xl py-3.5 px-11 text-sm font-semibold capitalize focus:border-dtdc-blue focus:ring-[3px] focus:ring-blue-100/50 focus:bg-white transition-all text-slate-800 outline-none shadow-sm"
-                        required>
-
-                    <i data-lucide="map-pin"
-                        class="absolute left-3.5 top-[15px] w-4 h-4 text-slate-400"></i>
-                </div>
+                <i data-lucide="map-pin"
+                    class="absolute left-3 top-[14px] w-4 h-4 text-slate-400"></i>
             </div>
+        </div>
 
-            <!-- RATE -->
-            <div class="space-y-1.5">
-                <label class="block text-xs font-bold text-slate-600 px-1 uppercase tracking-widest">
-                    Charges (₹)
-                </label>
 
-                <div class="relative group">
-                    <input type="number"
-                        step="1"
-                        name="rate"
-                        placeholder="0"
-                        class="w-full bg-slate-50/80 border border-slate-200/60 rounded-xl py-3.5 pl-11 pr-4 text-base font-bold focus:border-dtdc-blue focus:ring-[3px] focus:ring-blue-100/50 focus:bg-white transition-all text-slate-800 outline-none shadow-sm"
-                        required>
+        <!-- RATE -->
+        <div>
+            <label class="text-xs font-bold text-slate-600 uppercase">Charges (₹)</label>
 
-                    <i data-lucide="indian-rupee"
-                        class="absolute left-3.5 top-[15px] w-4 h-4 text-slate-400"></i>
-                </div>
+            <div class="relative mt-1">
+                <input type="number"
+                    name="rate"
+                    class="w-full border rounded-xl py-3 px-10 font-bold"
+                    required>
+
+                <i data-lucide="indian-rupee"
+                    class="absolute left-3 top-[14px] w-4 h-4 text-slate-400"></i>
             </div>
         </div>
 
 
         <!-- SUBMIT -->
-        <div class="pt-6 mt-4">
-            <button type="submit"
-                id="submitBtn"
-                class="w-full bg-gradient-to-r from-dtdc-red to-[#d01820] text-white py-4 px-6 rounded-xl font-bold text-sm shadow-[0_8px_20px_-4px_rgba(227,30,36,0.3)] flex items-center justify-center gap-3">
-                <span>Create Booking</span>
-                <i data-lucide="send" class="w-4 h-4"></i>
-            </button>
-        </div>
+        <button id="submitBtn"
+            class="w-full bg-red-600 text-white py-4 rounded-xl font-bold mt-4">
+            <span>Create Booking</span>
+        </button>
 
     </form>
 </div>
 
 
+
 <!-- SCANNER MODAL -->
 <div id="scannerModal"
-    class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
+    style="display:none"
+    class="fixed inset-0 bg-black/70 items-center justify-center z-50">
 
     <div class="bg-white rounded-2xl p-4 w-[95%] max-w-md">
 
-        <div class="flex justify-between items-center mb-3">
-            <h3 class="font-bold text-lg">Scan Barcode</h3>
+        <div class="flex justify-between mb-3">
+            <h3 class="font-bold">Scan Barcode</h3>
             <button onclick="stopScanner()">✕</button>
         </div>
 
-        <div id="reader" style="width:100%"></div>
+        <div id="reader"></div>
 
-        <p class="text-xs text-slate-500 mt-2 text-center">
+        <p class="text-xs text-center mt-2 text-slate-500">
             Point camera at AWB barcode
         </p>
     </div>
@@ -151,80 +134,69 @@
 
 
 
-<!-- BARCODE LIBRARY -->
-<script src="https://unpkg.com/html5-qrcode"></script>
-
-
 <script>
-/* =========================
-   FORM SUBMIT EFFECT
-========================= */
+
+/* ================= FORM EFFECT ================= */
+
 function handleFormSubmit() {
     const btn = document.getElementById('submitBtn');
-    const span = btn.querySelector('span');
-
-    span.innerText = 'Routing...';
+    btn.innerText = "Routing...";
 
     setTimeout(() => {
         document.getElementById('bookingForm').reset();
-        span.innerText = 'Create Booking';
-        document.querySelector('input[name="phone"]').focus();
+        btn.innerText = "Create Booking";
     }, 2000);
 }
 
 
-/* =========================
-   BARCODE SCANNER
-========================= */
+/* ================= BARCODE SCANNER ================= */
 
-let html5QrCode;
+let scanner = null;
 
 function startScanner() {
 
     const modal = document.getElementById("scannerModal");
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
+    modal.style.display = "flex";
 
-    html5QrCode = new Html5Qrcode("reader");
+    scanner = new Html5Qrcode("reader");
 
-    Html5Qrcode.getCameras().then(devices => {
+    Html5Qrcode.getCameras()
+        .then(devices => {
 
-        if (devices.length) {
+            if (!devices.length) {
+                alert("Camera not found");
+                return;
+            }
 
-            html5QrCode.start(
+            scanner.start(
                 devices[0].id,
-                {
-                    fps: 10,
-                    qrbox: 250
-                },
+                { fps: 10, qrbox: 250 },
                 (decodedText) => {
 
-                    // AUTO FILL
                     document.getElementById("trackingInput").value = decodedText;
-
                     stopScanner();
                 }
             );
-        }
-
-    }).catch(err => {
-        alert("Camera permission required.");
-    });
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Camera permission required");
+        });
 }
 
 function stopScanner() {
 
     const modal = document.getElementById("scannerModal");
 
-    if (html5QrCode) {
-        html5QrCode.stop().then(() => {
-            html5QrCode.clear();
-        });
+    if (scanner) {
+        scanner.stop()
+            .then(() => scanner.clear())
+            .catch(() => {});
     }
 
-    modal.classList.add("hidden");
-    modal.classList.remove("flex");
+    modal.style.display = "none";
 }
+
 </script>
 
 {% endblock %}
