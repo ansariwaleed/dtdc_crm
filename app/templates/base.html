@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>DTDC CRM | Enterprise</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'dtdc-blue': '#003366',
+                        'dtdc-red': '#e31e24',
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0,0,0,0.05)',
+                        'glow': '0 0 20px rgba(227,30,36,0.25)',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- ✅ Barcode Scanner Library (REQUIRED) -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+            background-color: #f8fafc;
+            background-image:
+                radial-gradient(at 0% 0%, hsla(211, 40%, 96%, 1) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(209, 50%, 95%, 1) 0px, transparent 50%);
+        }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.03);
+        }
+
+        .card-blur {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s ease-out;
+        }
+
+        .card-blur:active {
+            transform: scale(0.99);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(203, 213, 225, 0.5);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+
+<body class="text-slate-900 min-h-screen pb-28 pt-2">
+
+    <!-- ================= HEADER ================= -->
+    <header
+        class="p-5 flex items-center justify-between sticky top-0 bg-[#f8fafc]/80 backdrop-blur-xl z-40 mb-2 border-b border-slate-200/50">
+
+        <div class="flex items-center gap-3">
+            <div
+                class="w-10 h-10 bg-gradient-to-br from-dtdc-red to-[#b0161a] rounded-xl flex items-center justify-center text-white font-black italic shadow-md">
+                <span class="text-xl">D</span>
+            </div>
+
+            <div>
+                <h1 class="text-xl font-bold tracking-tight text-slate-800">
+                    DTDC <span class="text-dtdc-blue">CRM</span>
+                </h1>
+                <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">
+                    Franchise Portal
+                </p>
+            </div>
+        </div>
+
+        <div
+            class="w-10 h-10 bg-white rounded-full shadow-soft border flex items-center justify-center">
+            <i data-lucide="user" class="w-5 h-5 text-slate-600"></i>
+        </div>
+    </header>
+
+
+    <!-- ================= PAGE CONTENT ================= -->
+    <main class="px-5 sm:px-8 max-w-2xl mx-auto pb-8">
+        {% block content %}{% endblock %}
+    </main>
+
+
+    <!-- ================= BOTTOM NAV ================= -->
+    <nav class="fixed bottom-0 left-0 right-0 glass-nav h-[72px] px-3 sm:px-8 flex items-center justify-between z-50">
+
+        <a href="/" class="flex flex-col items-center gap-1 flex-1">
+            <i data-lucide="layout-dashboard"></i>
+            <span class="text-[9px] font-semibold">Home</span>
+        </a>
+
+        <a href="/shipments" class="flex flex-col items-center gap-1 flex-1">
+            <i data-lucide="package"></i>
+            <span class="text-[9px] font-semibold">Tracking</span>
+        </a>
+
+        <div class="relative flex-1 flex justify-center mt-[-32px]">
+            <a href="/add" class="flex flex-col items-center">
+                <div
+                    class="w-14 h-14 bg-gradient-to-b from-dtdc-red to-[#cc1920] shadow-glow rounded-full flex items-center justify-center text-white border-4 border-white">
+                    <i data-lucide="plus" class="w-7 h-7"></i>
+                </div>
+                <span class="text-[10px] font-bold text-dtdc-red mt-1.5">Book</span>
+            </a>
+        </div>
+
+        <a href="/customers" class="flex flex-col items-center gap-1 flex-1">
+            <i data-lucide="users"></i>
+            <span class="text-[9px] font-semibold">Clients</span>
+        </a>
+
+        <a href="/insights" class="flex flex-col items-center gap-1 flex-1">
+            <i data-lucide="bar-chart-3"></i>
+            <span class="text-[9px] font-semibold">Growth</span>
+        </a>
+
+    </nav>
+
+
+    <!-- ================= GLOBAL JS ================= -->
+
+    <script>
+        /* Re-render icons after page load */
+        document.addEventListener("DOMContentLoaded", () => {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        });
+    </script>
+
+</body>
+</html>
