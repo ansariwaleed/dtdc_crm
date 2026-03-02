@@ -2,120 +2,80 @@
 
 {% block content %}
 
-<div class="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-2">
-    <div>
-        <h2 class="text-2xl font-bold text-slate-800 tracking-tight">New Booking</h2>
-        <p class="text-sm font-medium text-slate-500 mt-0.5">Enter shipment details</p>
-    </div>
-</div>
+<div class="max-w-xl mx-auto bg-white p-8 rounded-2xl shadow">
 
-<div class="card-blur p-6 sm:p-8 rounded-[32px] max-w-xl mx-auto shadow-sm relative overflow-hidden">
+    <h2 class="text-2xl font-bold mb-6">New Booking</h2>
 
     <form id="bookingForm"
-        method="post"
-        action="/add"
-        target="_blank"
-        class="space-y-5"
-        onsubmit="handleFormSubmit()">
+          method="post"
+          action="/add"
+          target="_blank"
+          class="space-y-5"
+          onsubmit="handleFormSubmit()">
 
         <!-- PHONE -->
         <div>
-            <label class="text-xs font-bold text-slate-600 uppercase">Customer Mobile</label>
-
-            <div class="relative mt-1">
-                <input type="tel"
-                    name="phone"
-                    pattern="[0-9]{10}"
-                    maxlength="10"
-                    placeholder="9876543210"
-                    class="w-full border rounded-xl py-3 px-10 font-semibold"
-                    required>
-
-                <i data-lucide="phone"
-                    class="absolute left-3 top-[14px] w-5 h-5 text-slate-400"></i>
-            </div>
+            <label class="text-xs font-bold uppercase">Customer Mobile</label>
+            <input name="phone"
+                   type="tel"
+                   pattern="[0-9]{10}"
+                   maxlength="10"
+                   required
+                   class="w-full border rounded-xl p-3 mt-1">
         </div>
 
-
-        <!-- TRACKING + SCAN -->
+        <!-- TRACKING -->
         <div>
-            <label class="text-xs font-bold text-slate-600 uppercase">
-                Tracking ID (AWB)
-            </label>
+            <label class="text-xs font-bold uppercase">Tracking ID</label>
 
             <div class="flex gap-2 mt-1">
 
-                <div class="relative flex-1">
-                    <input id="trackingInput"
-                        name="tracking_id"
-                        type="text"
-                        placeholder="D12345678"
-                        class="w-full border rounded-xl py-3 px-10 font-bold uppercase"
-                        required>
-
-                    <i data-lucide="hash"
-                        class="absolute left-3 top-[14px] w-5 h-5 text-slate-400"></i>
-                </div>
+                <input id="trackingInput"
+                       name="tracking_id"
+                       required
+                       class="flex-1 border rounded-xl p-3 font-bold uppercase">
 
                 <button type="button"
-                    onclick="startScanner()"
-                    class="px-4 bg-black text-white rounded-xl flex items-center gap-2">
-                    <i data-lucide="scan-line" class="w-4 h-4"></i>
+                        onclick="startScanner()"
+                        class="bg-black text-white px-4 rounded-xl flex items-center gap-2">
+                    <i data-lucide="scan-line"></i>
                     Scan
                 </button>
 
             </div>
         </div>
 
-
         <!-- DESTINATION -->
         <div>
-            <label class="text-xs font-bold text-slate-600 uppercase">Destination</label>
-
-            <div class="relative mt-1">
-                <input type="text"
-                    name="destination_city"
-                    placeholder="City Name"
-                    class="w-full border rounded-xl py-3 px-10 font-semibold"
-                    required>
-
-                <i data-lucide="map-pin"
-                    class="absolute left-3 top-[14px] w-4 h-4 text-slate-400"></i>
-            </div>
+            <label class="text-xs font-bold uppercase">Destination</label>
+            <input name="destination_city"
+                   required
+                   class="w-full border rounded-xl p-3 mt-1">
         </div>
-
 
         <!-- RATE -->
         <div>
-            <label class="text-xs font-bold text-slate-600 uppercase">Charges (₹)</label>
-
-            <div class="relative mt-1">
-                <input type="number"
-                    name="rate"
-                    class="w-full border rounded-xl py-3 px-10 font-bold"
-                    required>
-
-                <i data-lucide="indian-rupee"
-                    class="absolute left-3 top-[14px] w-4 h-4 text-slate-400"></i>
-            </div>
+            <label class="text-xs font-bold uppercase">Charges ₹</label>
+            <input type="number"
+                   name="rate"
+                   required
+                   class="w-full border rounded-xl p-3 mt-1">
         </div>
 
-
-        <!-- SUBMIT -->
         <button id="submitBtn"
-            class="w-full bg-red-600 text-white py-4 rounded-xl font-bold mt-4">
-            <span>Create Booking</span>
+                class="w-full bg-red-600 text-white p-4 rounded-xl font-bold">
+            Create Booking
         </button>
 
     </form>
 </div>
 
 
+<!-- ================= SCANNER MODAL ================= -->
 
-<!-- SCANNER MODAL -->
 <div id="scannerModal"
-    style="display:none"
-    class="fixed inset-0 bg-black/70 items-center justify-center z-50">
+     style="display:none"
+     class="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
 
     <div class="bg-white rounded-2xl p-4 w-[95%] max-w-md">
 
@@ -124,11 +84,23 @@
             <button onclick="stopScanner()">✕</button>
         </div>
 
+        <!-- CAMERA SELECT -->
+        <div class="flex gap-2 mb-3">
+            <select id="cameraSelect"
+                    class="flex-1 border rounded-lg p-2 text-sm"></select>
+
+            <button onclick="switchCamera()"
+                    class="bg-black text-white px-3 rounded-lg text-sm">
+                Switch
+            </button>
+        </div>
+
         <div id="reader"></div>
 
         <p class="text-xs text-center mt-2 text-slate-500">
-            Point camera at AWB barcode
+            Select rear camera for best scanning
         </p>
+
     </div>
 </div>
 
@@ -138,63 +110,103 @@
 
 /* ================= FORM EFFECT ================= */
 
-function handleFormSubmit() {
-    const btn = document.getElementById('submitBtn');
+function handleFormSubmit(){
+    const btn = document.getElementById("submitBtn");
     btn.innerText = "Routing...";
-
-    setTimeout(() => {
-        document.getElementById('bookingForm').reset();
-        btn.innerText = "Create Booking";
-    }, 2000);
+    setTimeout(()=>{
+        document.getElementById("bookingForm").reset();
+        btn.innerText="Create Booking";
+    },2000);
 }
 
 
 /* ================= BARCODE SCANNER ================= */
 
-let scanner = null;
+let scanner=null;
+let cameras=[];
+let currentCameraIndex=0;
 
-function startScanner() {
+function startScanner(){
 
-    const modal = document.getElementById("scannerModal");
-    modal.style.display = "flex";
+    document.getElementById("scannerModal").style.display="flex";
 
-    scanner = new Html5Qrcode("reader");
+    scanner=new Html5Qrcode("reader");
 
-    Html5Qrcode.getCameras()
-        .then(devices => {
+    Html5Qrcode.getCameras().then(devices=>{
 
-            if (!devices.length) {
-                alert("Camera not found");
-                return;
-            }
+        cameras=devices;
+        if(!cameras.length){
+            alert("No camera found");
+            return;
+        }
 
-            scanner.start(
-                devices[0].id,
-                { fps: 10, qrbox: 250 },
-                (decodedText) => {
+        populateCameraList();
 
-                    document.getElementById("trackingInput").value = decodedText;
-                    stopScanner();
-                }
-            );
-        })
-        .catch(err => {
-            console.error(err);
-            alert("Camera permission required");
-        });
+        // prefer rear cam
+        const rearIndex=cameras.findIndex(c=>
+            c.label.toLowerCase().includes("back") ||
+            c.label.toLowerCase().includes("rear")
+        );
+
+        currentCameraIndex=rearIndex>=0?rearIndex:0;
+
+        startCamera(cameras[currentCameraIndex].id);
+
+    }).catch(()=>{
+        alert("Camera permission required");
+    });
 }
 
-function stopScanner() {
+function startCamera(id){
+    scanner.start(
+        id,
+        {fps:10, qrbox:250},
+        text=>{
+            document.getElementById("trackingInput").value=text;
+            stopScanner();
+        }
+    );
+}
 
-    const modal = document.getElementById("scannerModal");
+function populateCameraList(){
 
-    if (scanner) {
+    const select=document.getElementById("cameraSelect");
+    select.innerHTML="";
+
+    cameras.forEach((cam,i)=>{
+        const opt=document.createElement("option");
+        opt.value=i;
+        opt.text=cam.label||`Camera ${i+1}`;
+        select.appendChild(opt);
+    });
+
+    select.onchange=function(){
+        currentCameraIndex=parseInt(this.value);
+        restartCamera();
+    };
+}
+
+function switchCamera(){
+    currentCameraIndex=(currentCameraIndex+1)%cameras.length;
+    document.getElementById("cameraSelect").value=currentCameraIndex;
+    restartCamera();
+}
+
+function restartCamera(){
+    scanner.stop().then(()=>{
+        startCamera(cameras[currentCameraIndex].id);
+    });
+}
+
+function stopScanner(){
+
+    if(scanner){
         scanner.stop()
-            .then(() => scanner.clear())
-            .catch(() => {});
+            .then(()=>scanner.clear())
+            .catch(()=>{});
     }
 
-    modal.style.display = "none";
+    document.getElementById("scannerModal").style.display="none";
 }
 
 </script>
