@@ -26,7 +26,7 @@
 
         <!-- TRACKING -->
         <div>
-            <label class="text-xs font-bold uppercase">Tracking ID</label>
+            <label class="text-xs font-bold uppercase">Tracking ID (AWB)</label>
 
             <div class="flex gap-2 mt-1">
 
@@ -71,6 +71,7 @@
 </div>
 
 
+
 <!-- ================= SCANNER MODAL ================= -->
 
 <div id="scannerModal"
@@ -95,10 +96,10 @@
             </button>
         </div>
 
-        <div id="reader"></div>
+        <div id="reader" style="width:100%"></div>
 
         <p class="text-xs text-center mt-2 text-slate-500">
-            Select rear camera for best scanning
+            Allow camera permission if asked
         </p>
 
     </div>
@@ -106,13 +107,15 @@
 
 
 
+<!-- ================= PAGE SCRIPT ================= -->
+
 <script>
 
-/* ================= FORM EFFECT ================= */
+/* ---------- FORM EFFECT ---------- */
 
 function handleFormSubmit(){
-    const btn = document.getElementById("submitBtn");
-    btn.innerText = "Routing...";
+    const btn=document.getElementById("submitBtn");
+    btn.innerText="Routing...";
     setTimeout(()=>{
         document.getElementById("bookingForm").reset();
         btn.innerText="Create Booking";
@@ -120,53 +123,66 @@ function handleFormSubmit(){
 }
 
 
-/* ================= BARCODE SCANNER ================= */
+/* ---------- BARCODE SCANNER ---------- */
 
 let scanner=null;
 let cameras=[];
 let currentCameraIndex=0;
 
-function startScanner(){
+async function startScanner(){
 
-    document.getElementById("scannerModal").style.display="flex";
+    const modal=document.getElementById("scannerModal");
+    modal.style.display="flex";
 
-    scanner=new Html5Qrcode("reader");
+    // wait for modal render
+    await new Promise(r=>setTimeout(r,400));
 
-    Html5Qrcode.getCameras().then(devices=>{
+    try{
 
-        cameras=devices;
+        // force permission handshake (VERY IMPORTANT for Vercel/mobile)
+        await navigator.mediaDevices.getUserMedia({video:true});
+
+        cameras=await Html5Qrcode.getCameras();
+
         if(!cameras.length){
-            alert("No camera found");
+            alert("No camera detected");
             return;
         }
 
         populateCameraList();
 
-        // prefer rear cam
+        // auto choose rear camera
         const rearIndex=cameras.findIndex(c=>
             c.label.toLowerCase().includes("back") ||
-            c.label.toLowerCase().includes("rear")
+            c.label.toLowerCase().includes("rear") ||
+            c.label.toLowerCase().includes("environment")
         );
 
         currentCameraIndex=rearIndex>=0?rearIndex:0;
 
-        startCamera(cameras[currentCameraIndex].id);
+        scanner=new Html5Qrcode("reader");
 
-    }).catch(()=>{
-        alert("Camera permission required");
-    });
+        await scanner.start(
+            cameras[currentCameraIndex].id,
+            {
+                fps:10,
+                qrbox:{width:250,height:250},
+                aspectRatio:1.0
+            },
+            decodedText=>{
+                document.getElementById("trackingInput").value=decodedText;
+                stopScanner();
+            }
+        );
+
+    }catch(err){
+        console.error(err);
+        alert("Camera permission blocked or unavailable.");
+    }
 }
 
-function startCamera(id){
-    scanner.start(
-        id,
-        {fps:10, qrbox:250},
-        text=>{
-            document.getElementById("trackingInput").value=text;
-            stopScanner();
-        }
-    );
-}
+
+/* ---------- CAMERA LIST ---------- */
 
 function populateCameraList(){
 
@@ -186,24 +202,48 @@ function populateCameraList(){
     };
 }
 
-function switchCamera(){
-    currentCameraIndex=(currentCameraIndex+1)%cameras.length;
+
+/* ---------- SWITCH CAMERA ---------- */
+
+async function switchCamera(){
+
+    if(!scanner) return;
+
+    currentCameraIndex=
+        (currentCameraIndex+1)%cameras.length;
+
     document.getElementById("cameraSelect").value=currentCameraIndex;
-    restartCamera();
+
+    await restartCamera();
 }
 
-function restartCamera(){
-    scanner.stop().then(()=>{
-        startCamera(cameras[currentCameraIndex].id);
-    });
+
+/* ---------- RESTART ---------- */
+
+async function restartCamera(){
+
+    await scanner.stop();
+
+    await scanner.start(
+        cameras[currentCameraIndex].id,
+        {fps:10,qrbox:250},
+        text=>{
+            document.getElementById("trackingInput").value=text;
+            stopScanner();
+        }
+    );
 }
 
-function stopScanner(){
+
+/* ---------- STOP ---------- */
+
+async function stopScanner(){
 
     if(scanner){
-        scanner.stop()
-            .then(()=>scanner.clear())
-            .catch(()=>{});
+        try{
+            await scanner.stop();
+            await scanner.clear();
+        }catch(e){}
     }
 
     document.getElementById("scannerModal").style.display="none";
