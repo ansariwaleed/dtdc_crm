@@ -206,7 +206,7 @@ def add_shipment(
     db.add(shipment)
     db.commit()
 
-    tracking_link = f"https://trackcourier.io/track-and-trace/dtdc/{tracking_id}"
+    tracking_link = f"https://www.dtdc.com/track-your-shipment/?ref={tracking_id}"
     franchise_name = "DTDC Deokali Tiraha – Faizabad"
     franchise_phone = "9519291041"
     gmap_link = "https://maps.app.goo.gl/8w3MpRrRhrvDemB79?g_st=aw"
