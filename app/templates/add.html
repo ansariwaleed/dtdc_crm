@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="max-w-xl mx-auto bg-white p-8 rounded-2xl shadow">
+
+    <h2 class="text-2xl font-bold mb-6">New Booking</h2>
+
+    <form id="bookingForm" method="post" action="/add" target="_blank" class="space-y-5" onsubmit="handleFormSubmit()">
+
+        <!-- PHONE -->
+        <div>
+            <label class="text-xs font-bold uppercase">Customer Mobile</label>
+            <input name="phone" type="tel" pattern="[0-9]{10}" maxlength="10" required
+                class="w-full border rounded-xl p-3 mt-1">
+        </div>
+
+        <!-- TRACKING -->
+        <div>
+            <label class="text-xs font-bold uppercase">Tracking ID (AWB)</label>
+
+            <div class="flex gap-2 mt-1">
+
+                <input id="trackingInput" name="tracking_id" required
+                    class="flex-1 border rounded-xl p-3 font-bold uppercase">
+
+                <button type="button" onclick="startScanner()"
+                    class="bg-black text-white px-4 rounded-xl flex items-center gap-2">
+                    <i data-lucide="scan-line"></i>
+                    Scan
+                </button>
+
+            </div>
+        </div>
+
+        <!-- DESTINATION -->
+        <div>
+            <label class="text-xs font-bold uppercase">Destination</label>
+            <input name="destination_city" required class="w-full border rounded-xl p-3 mt-1">
+        </div>
+
+        <!-- RATE -->
+        <div>
+            <label class="text-xs font-bold uppercase">Charges ₹</label>
+            <input type="number" name="rate" required class="w-full border rounded-xl p-3 mt-1">
+        </div>
+
+        <button id="submitBtn" class="w-full bg-red-600 text-white p-4 rounded-xl font-bold">
+            Create Booking
+        </button>
+
+    </form>
+</div>
+
+
+
+<!-- ================= SCANNER MODAL ================= -->
+
+<div id="scannerModal" style="display:none" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+
+    <div class="bg-white rounded-2xl p-4 w-[95%] max-w-md">
+
+        <div class="flex justify-between mb-3">
+            <h3 class="font-bold">Scan Barcode</h3>
+            <button onclick="stopScanner()">✕</button>
+        </div>
+
+        <!-- CAMERA SELECT -->
+        <div class="flex gap-2 mb-3">
+            <select id="cameraSelect" class="flex-1 border rounded-lg p-2 text-sm"></select>
+
+            <button onclick="switchCamera()" class="bg-black text-white px-3 rounded-lg text-sm">
+                Switch
+            </button>
+        </div>
+
+        <div id="reader" style="width:100%"></div>
+
+        <p class="text-xs text-center mt-2 text-slate-500">
+            Allow camera permission if asked
+        </p>
+
+    </div>
+</div>
+
+
+
+<!-- ================= PAGE SCRIPT ================= -->
+
+<script>
+
+    /* ---------- FORM EFFECT ---------- */
+
+    function handleFormSubmit() {
+        const btn = document.getElementById("submitBtn");
+        btn.innerText = "Routing...";
+        setTimeout(() => {
+            document.getElementById("bookingForm").reset();
+            btn.innerText = "Create Booking";
+        }, 2000);
+    }
+
+
+    /* ---------- BARCODE SCANNER ---------- */
+
+    let scanner = null;
+    let cameras = [];
+    let currentCameraIndex = 0;
+
+    async function startScanner() {
+
+        const modal = document.getElementById("scannerModal");
+        modal.style.display = "flex";
+
+        // wait for modal render
+        await new Promise(r => setTimeout(r, 400));
+
+        try {
+
+            // force permission handshake (VERY IMPORTANT for Vercel/mobile)
+            await navigator.mediaDevices.getUserMedia({ video: true });
+
+            cameras = await Html5Qrcode.getCameras();
+
+            if (!cameras.length) {
+                alert("No camera detected");
+                return;
+            }
+
+            populateCameraList();
+
+            // auto choose rear camera
+            const rearIndex = cameras.findIndex(c =>
+                c.label.toLowerCase().includes("back") ||
+                c.label.toLowerCase().includes("rear") ||
+                c.label.toLowerCase().includes("environment")
+            );
+
+            currentCameraIndex = rearIndex >= 0 ? rearIndex : 0;
+
+            scanner = new Html5Qrcode("reader");
+
+            await scanner.start(
+                cameras[currentCameraIndex].id,
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 },
+                    aspectRatio: 1.0
+                },
+                decodedText => {
+                    document.getElementById("trackingInput").value = decodedText;
+                    stopScanner();
+                }
+            );
+
+        } catch (err) {
+            console.error(err);
+            alert("Camera permission blocked or unavailable.");
+        }
+    }
+
+
+    /* ---------- CAMERA LIST ---------- */
+
+    function populateCameraList() {
+
+        const select = document.getElementById("cameraSelect");
+        select.innerHTML = "";
+
+        cameras.forEach((cam, i) => {
+            const opt = document.createElement("option");
+            opt.value = i;
+            opt.text = cam.label || `Camera ${i + 1}`;
+            select.appendChild(opt);
+        });
+
+        select.onchange = function () {
+            currentCameraIndex = parseInt(this.value);
+            restartCamera();
+        };
+    }
+
+
+    /* ---------- SWITCH CAMERA ---------- */
+
+    async function switchCamera() {
+
+        if (!scanner) return;
+
+        currentCameraIndex =
+            (currentCameraIndex + 1) % cameras.length;
+
+        document.getElementById("cameraSelect").value = currentCameraIndex;
+
+        await restartCamera();
+    }
+
+
+    /* ---------- RESTART ---------- */
+
+    async function restartCamera() {
+
+        await scanner.stop();
+
+        await scanner.start(
+            cameras[currentCameraIndex].id,
+            { fps: 10, qrbox: 250 },
+            text => {
+                document.getElementById("trackingInput").value = text;
+                stopScanner();
+            }
+        );
+    }
+
+
+    /* ---------- STOP ---------- */
+
+    async function stopScanner() {
+
+        if (scanner) {
+            try {
+                await scanner.stop();
+                await scanner.clear();
+            } catch (e) { }
+        }
+
+        document.getElementById("scannerModal").style.display = "none";
+    }
+
+    /* ---------- AUTO-START SCANNER ---------- */
+    document.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('scan') === 'true') {
+            startScanner();
+        }
+    });
+
+</script>
+
+{% endblock %}
